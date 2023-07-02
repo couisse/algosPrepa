@@ -29,7 +29,12 @@ listeChainee liste_vide();
 
 /** \brief Libere les ressources consommees par la liste
  */
-void liste_detruire(listeChainee *cible);
+void liste_detruire(listeChainee *l);
+
+
+/** \brief Renvoie 0 si la liste est vide, 1 sinon
+ */
+int liste_etat(listeChainee *l);
 
 
 /** \brief Renvoie un pointeur sur la valeur de l'element d'index i,

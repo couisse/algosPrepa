@@ -22,6 +22,12 @@ void liste_detruire(listeChainee *cible){
     cible->chaine = NULL;
 }
 
+///Etat
+
+int liste_etat(listeChainee *l){
+    return (l == NULL || l->chaine == NULL) ? 0 : 1;
+}
+
 ///Accesseur
 
 
