@@ -1,6 +1,5 @@
 #include "listechainee.h"
 
-
 ///Constructeur
 
 listeChainee liste_vide(){
