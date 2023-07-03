@@ -13,15 +13,15 @@ int tas_idx_parent(int index){
     return index >> 1; //l'index du parent est index / 2
 }
 
-tas_min tas_vide(size_t capacite)
+tas_max tas_vide(size_t capacite)
 {
-    tas_min t = {NULL, 0, capacite};
+    tas_max t = {NULL, 0, capacite};
     t.donnees = (TYPE*)malloc(sizeof(TYPE) * capacite);
     if (t.donnees == NULL){t.capacite = 0;}
     return t;
 }
 
-void tas_detruire(tas_min *t)
+void tas_detruire(tas_max *t)
 {
     if (t == NULL || t->donnees == NULL) {return;}
     free(t->donnees);
@@ -29,7 +29,7 @@ void tas_detruire(tas_min *t)
     t->capacite = 0;
 }
 
-int tas_change_capacite(tas_min *t, size_t nouvelle){
+int tas_change_capacite(tas_max *t, size_t nouvelle){
     if (t == NULL || nouvelle < t->taille) {return 1;}
     //reservation de la memoire
     TYPE* nouvelles_donnes = (TYPE*)malloc(nouvelle * sizeof(TYPE));
@@ -44,7 +44,7 @@ int tas_change_capacite(tas_min *t, size_t nouvelle){
 
 /** \brief Augmentation de la taille du tas en cas de débordement
  */
-int tas_augmenter(tas_min *t){
+int tas_augmenter(tas_max *t){
     if (t == NULL) {return 1;}
     //multiplication de la capacite par 1.5 (cf librairie standard)
     //2 points fixes sont 0 et 1, que l'on traite separement
@@ -57,7 +57,7 @@ int tas_augmenter(tas_min *t){
  */
 void tas_remonter_noeud(TYPE* t, int index){
     int prec = tas_idx_parent(index);
-    if (t[prec] > t[index]){ //si la propriete du tas min n'est pas verifiee
+    if (t[prec] < t[index]){ //si la propriete du tas min n'est pas verifiee
         int tmp = t[index];
         t[index] = t[prec];
         t[prec] = tmp;
@@ -65,7 +65,7 @@ void tas_remonter_noeud(TYPE* t, int index){
     }
 }
 
-int tas_insere(tas_min *t, TYPE valeur){
+int tas_insere(tas_max *t, TYPE valeur){
     if (t == NULL){return 1;}
     if (t->taille >= t->capacite){
         if (tas_augmenter(t) != 0) {return 1;}
@@ -77,26 +77,26 @@ int tas_insere(tas_min *t, TYPE valeur){
     return 0;
 }
 
-TYPE tas_consulter(tas_min *t, TYPE defaut){
+TYPE tas_consulter(tas_max *t, TYPE defaut){
     if (t == NULL || t->donnees == 0 || t->donnees == NULL) {return defaut;}
     return t->donnees[0];
 }
 
-TYPE tas_consulter_d(tas_min *t){
+TYPE tas_consulter_d(tas_max *t){
     return tas_consulter(t, 0); //cf doc en cas d'erreur de compilation
 }
 
 /** \brief Cette fonction est auxiliaire a tas_extraire et sert à retablir
  *         la propriete du tas min lors de la suppression
  */
-void tas_descendre_noeud(tas_min* t, int index){
+void tas_descendre_noeud(tas_max* t, int index){
 
     int gauche = tas_idx_gauche(index);
     int droite = tas_idx_droit(index);
 
     //as relatif a l'arrivee a un noeud qui a une descendance
     if (gauche < t->taille){
-        if (droite < t->taille && t->donnees[gauche] > t->donnees[droite]){ //2 enfants
+        if (droite < t->taille && t->donnees[gauche] < t->donnees[droite]){ //2 enfants
             t->donnees[index] = t->donnees[droite];
             tas_descendre_noeud(t, droite);
         }else { //seulement un fils de gauche (ne peut avoir uniquement un fils de droite)
@@ -109,7 +109,7 @@ void tas_descendre_noeud(tas_min* t, int index){
     }
 }
 
-TYPE tas_extraire(tas_min *t, TYPE defaut){
+TYPE tas_extraire(tas_max *t, TYPE defaut){
     if (t == NULL || t->taille == 0 || t->donnees == NULL) {return defaut;}
     TYPE valeur = t->donnees[0];
     tas_descendre_noeud(t, 0);
@@ -117,36 +117,36 @@ TYPE tas_extraire(tas_min *t, TYPE defaut){
     return valeur;
 }
 
-TYPE tas_extraire_d(tas_min *t){
+TYPE tas_extraire_d(tas_max *t){
     return tas_extraire(t, 0);
 }
 
 /** \brief Cette fonction est auxiliaire a tas_creer et sert a creer les sous-tas
  */
-void entasser(tas_min *t, int index){
+void entasser(tas_max *t, int index){
     int gauche = tas_idx_gauche(index);
     int droite = tas_idx_droit(index);
-    int min;
+    int max;
     //recherche de l'indice du minimum
-    if (gauche < t->taille && t->donnees[index] > t->donnees[gauche]){
-        min = gauche;
+    if (gauche < t->taille && t->donnees[index] < t->donnees[gauche]){
+        max = gauche;
     }else {
-        min = index;
+        max = index;
     }
-    if (droite < t->taille && t->donnees[min] > t->donnees[droite]){
-        min = droite;
+    if (droite < t->taille && t->donnees[max] < t->donnees[droite]){
+        max = droite;
     }
     //mise du minimum en haut et appel recursif
-    if (min != index){
+    if (max != index){
         int tmp = t->donnees[index];
-        t->donnees[index] = t->donnees[min];
-        t->donnees[min] = tmp;
-        entasser(t, min);
+        t->donnees[index] = t->donnees[max];
+        t->donnees[max] = tmp;
+        entasser(t, max);
     }
 }
 
-tas_min tas_creer(TYPE* donnees, size_t nombre){
-    tas_min t = {donnees, nombre, nombre};
+tas_max tas_creer(TYPE* donnees, size_t nombre){
+    tas_max t = {donnees, nombre, nombre};
     for (int i = nombre/2; i >= 0; i--){
         entasser(&t, i);
     }
